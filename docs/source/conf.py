@@ -113,7 +113,7 @@ def generateRST(outDir, moduleName, listModules, listFiles) :
     # doxygenfile
     for fileName in listFiles :
         outFile.write(".. doxygenfile:: %s/%s\n" % (outDir[3:], fileName))
-        outFile.write("   :project: SeqAn3\n\n") # TODO generic
+        outFile.write("   :project: Seqan3\n\n") # TODO generic
 
     # toctree
     outFile.write(".. toctree::\n")
