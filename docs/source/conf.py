@@ -24,7 +24,7 @@ import os, subprocess, sys
 def run_doxygen(folder, includeDir=None):
     """Run the doxygen make command in the designated folder"""
     try:
-        retcode = subprocess.call("cd %s; cmake -DSEQAN3_INCLUDE_DIR=%s ." % (folder, includeDir), shell=True)
+        retcode = subprocess.call("cd %s; cmake -DSEQAN3_INCLUDE_DIR=%s .; ls .; ls .." % (folder, includeDir), shell=True)
         if retcode < 0:
             sys.stderr.write("cmake for doxygen failed")
 
@@ -63,7 +63,7 @@ def download_seqan(folder):
     """Download SeqAn repository to designated folder"""
 
     try:
-        retcode = subprocess.call("printenv; ls .; ls ..; ls ../..; git clone -b fix_docs https://github.com/eseiler/seqan3.git %s" % folder, shell=True)
+        retcode = subprocess.call("git clone -b fix_docs https://github.com/eseiler/seqan3.git %s" % folder, shell=True)
         if retcode < 0:
             sys.stderr.write("git clone terminated by signal %s" % (-retcode))
     except OSError as e:
