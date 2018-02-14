@@ -112,7 +112,7 @@ def generateRST(outDir, moduleName, listModules, listFiles) :
 
     # doxygenfile
     for fileName in listFiles :
-        outFile.write(".. doxygenfile:: %s/%s\n" % (outDir[3:], fileName))
+        outFile.write(".. doxygenfile:: %s/%s\n" % (outdir.split("/")[-1], fileName))
         outFile.write("   :project: Seqan3\n\n") # TODO generic
 
     # toctree
@@ -129,7 +129,7 @@ def generateRSTs(inDir, outDir, isRoot=False):
     listModules = []
     listFiles = []
     for fileName in os.listdir(inDir) :
-        if os.path.isdir(inDir + "/" + fileName) == True:
+        if os.path.isdir(inDir + fileName) == True:
             listModules.append(fileName)  
         else :
             fileExt = fileName.split(".")[-1]
@@ -147,8 +147,8 @@ def generateRSTs(inDir, outDir, isRoot=False):
 
 
     for moduleName in listModules :
-        curInDir = inDir + "/" + moduleName
-        curOutDir = outDir + "/" + moduleName
+        curInDir = inDir + moduleName
+        curOutDir = outDir + moduleName
         generateRSTs(curInDir, curOutDir, False)
 
 # -- General configuration ------------------------------------------------
