@@ -28,7 +28,7 @@ def run_doxygen(folder, includeDir=None):
         if retcode < 0:
             sys.stderr.write("cmake for doxygen failed")
 
-        retcode = subprocess.call("cd %s; make doc_devel" % folder, shell=True)
+        retcode = subprocess.call("cd %s; make doc_devel; ls devel_doc/xml" % folder, shell=True)
         if retcode < 0:
             sys.stderr.write("doxygen terminated by signal %s" % (-retcode))
     except OSError as e:
