@@ -42,8 +42,8 @@ def generate_rtd(app):
 
     if read_the_docs_build:
 
-        download_seqan("../seqan3")
-        run_doxygen("../doxygen", "../seqan3/include/seqan3/")
+        download_seqan("../../seqan3")
+        run_doxygen("../../doxygen", "../../seqan3/include/seqan3/")
         generate_source()
 
 
@@ -51,7 +51,7 @@ def download_seqan(folder):
     """Download SeqAn repository to designated folder"""
 
     try:
-        retcode = subprocess.call("printenv; ls .; ls ..; git clone -b fix_docs https://github.com/eseiler/seqan3.git %s" % folder, shell=True)
+        retcode = subprocess.call("printenv; ls .; ls ..; ls ../..; git clone -b fix_docs https://github.com/eseiler/seqan3.git %s" % folder, shell=True)
         if retcode < 0:
             sys.stderr.write("git clone terminated by signal %s" % (-retcode))
     except OSError as e:
