@@ -20,7 +20,6 @@
 # import sys
 # sys.path.insert(0, os.path.abspath('.'))
 import os, subprocess, sys
-sys.path.append("/tmp/breathe-4.7.3")
 
 def run_doxygen(folder, includeDir=None):
     """Run the doxygen make command in the designated folder"""
