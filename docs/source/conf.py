@@ -42,9 +42,21 @@ def generate_rtd(app):
 
     if read_the_docs_build:
 
-        download_seqan("../../seqan3")
-        run_doxygen("../../doxygen", "../../seqan3/include/seqan3/")
-        generate_source()
+        cloneDir = "../../seqan3"
+        doxygenDir = "../../doxygen"
+        includeDir = "../../seqan3/include/seqan3/"
+        sourceDir = "../source/"
+
+    else:
+
+        cloneDir = "../seqan3"
+        doxygenDir = "../doxygen"
+        includeDir = "../seqan3/include/seqan3/"
+        sourceDir = "./source/"
+
+    download_seqan(cloneDir)
+    run_doxygen(doxygenDir, includeDir)
+    generate_source(includeDir, sourceDir)
 
 
 def download_seqan(folder):
@@ -57,9 +69,7 @@ def download_seqan(folder):
     except OSError as e:
         sys.stderr.write("download SeqAn execution failed: %s" % e)
     
-def generate_source():
-    inDir = "../seqan3/include/seqan3/"
-    outDir = "./source/"
+def generate_source(inDir, outDir):
     generateIndex(inDir, outDir)
     generateRSTs(inDir, outDir, True)
 
