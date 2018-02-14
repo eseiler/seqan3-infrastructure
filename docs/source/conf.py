@@ -161,7 +161,7 @@ def generateRSTs(inDir, outDir, isRoot=False):
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = ['breathe']
-breathe_projects = { "Seqan3": "/home/enrico/git/seqan3-infrastructure/doxygen/devel_doc/xml/" }
+breathe_projects = { "Seqan3": "../../doxygen/devel_doc/xml/" }
 breathe_default_project = "Seqan3"
 
 # Add any paths that contain templates here, relative to this directory.
