@@ -24,11 +24,11 @@ import os, subprocess, sys
 def run_doxygen(folder, includeDir=None):
     """Run the doxygen make command in the designated folder"""
     try:
-        retcode = subprocess.call("cd %s; cmake -DSEQAN3_INCLUDE_DIR=%s .; ls .; ls .." % (folder, includeDir), shell=True)
+        retcode = subprocess.call("cd %s; cmake -DSEQAN3_INCLUDE_DIR=%s ." % (folder, includeDir), shell=True)
         if retcode < 0:
             sys.stderr.write("cmake for doxygen failed")
 
-        retcode = subprocess.call("cd %s; make doc_devel" % folder, shell=True)
+        retcode = subprocess.call("cd %s; make doc_devel; ls .; ls .." % folder, shell=True)
         if retcode < 0:
             sys.stderr.write("doxygen terminated by signal %s" % (-retcode))
     except OSError as e:
