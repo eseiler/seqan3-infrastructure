@@ -51,7 +51,7 @@ def download_seqan(folder):
     """Download SeqAn repository to designated folder"""
 
     try:
-        retcode = subprocess.call("git clone -b fix_docs https://github.com/eseiler/seqan3.git %s" % folder, shell=True)
+        retcode = subprocess.call("printenv; git clone -b fix_docs https://github.com/eseiler/seqan3.git %s" % folder, shell=True)
         if retcode < 0:
             sys.stderr.write("git clone terminated by signal %s" % (-retcode))
     except OSError as e:
