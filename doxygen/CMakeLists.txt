@@ -8,9 +8,9 @@ project (seqan3_documentation)
 message (STATUS "Searching for seqan3.")
 find_package(SeqAn3)
 
-if (NOT SeqAn3_FOUND)
-    set (SEQAN3_INCLUDE_DIR "/Users/rmaerker/Development/seqan3/seqan3-src/include/seqan3")
-endif ()
+#if (NOT SeqAn3_FOUND)
+#    set (SEQAN3_INCLUDE_DIR "/Users/rmaerker/Development/seqan3/seqan3-src/include/seqan3")
+#endif ()
 
 ### Find doxygen and dependency to DOT tool
 message (STATUS "Searching for doxygen.")
