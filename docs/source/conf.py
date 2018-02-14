@@ -44,7 +44,8 @@ def generate_rtd(app):
 
         cloneDir = "../../seqan3"
         doxygenDir = "../../doxygen"
-        includeDir = "../../seqan3/include/seqan3/"
+        includeDir = "../seqan3/include/seqan3/"
+        insourceDir = "../../seqan3/include/seqan3"
         sourceDir = "../source/"
 
     else:
@@ -52,11 +53,12 @@ def generate_rtd(app):
         cloneDir = "../seqan3"
         doxygenDir = "../doxygen"
         includeDir = "../seqan3/include/seqan3/"
+        insourceDir = includeDir
         sourceDir = "./source/"
 
     download_seqan(cloneDir)
     run_doxygen(doxygenDir, includeDir)
-    generate_source(includeDir, sourceDir)
+    generate_source(insourceDir, sourceDir)
 
 
 def download_seqan(folder):
