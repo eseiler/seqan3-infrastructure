@@ -19,6 +19,8 @@
 # sys.path.insert(0, os.path.abspath('.'))
 import os, subprocess, sys, time
 
+READ_THE_DOCS = False
+
 def run_doxygen(folder, includeDir=None):
     """Run the doxygen make command in the designated folder"""
     print("DEBUGRTD Running doxygen with parameters folder={} and includeDir={} in pwd={}".format(folder, includeDir,
@@ -27,11 +29,10 @@ def run_doxygen(folder, includeDir=None):
         retcode = subprocess.call("cd %s; cmake -DSEQAN3_INCLUDE_DIR=%s . &>/dev/null" % (folder, includeDir), shell=True)
         if retcode < 0:
             sys.stderr.write("cmake for doxygen failed")
-        #time.sleep(5)
+        if READ_THE_DOCS: time.sleep(5)
         retcode = subprocess.call("cd %s; ls; make doc_devel &>/dev/null; ls doc_devel; ls doc_devel/xml" % folder, shell=True)
         if retcode < 0:
             sys.stderr.write("doxygen terminated by signal %s" % (-retcode))
-        #time.sleep(5)
     except OSError as e:
         sys.stderr.write("doxygen execution failed: %s" % e)
 
@@ -40,9 +41,9 @@ def generate_rtd(app):
     """Run the doxygen make commands if we're on the ReadTheDocs server"""
 
     print("DEBUGRTD Running generate_rtd in pwd={}".format(os.getcwd()))
-    read_the_docs_build = os.environ.get('READTHEDOCS', None) == 'True'
+    global READ_THE_DOCS = os.environ.get('READTHEDOCS', None) == 'True'
 
-    if read_the_docs_build:
+    if READ_THE_DOCS:
 
         cloneDir = "../../seqan3"
         doxygenDir = "../../doxygen"
@@ -59,9 +60,9 @@ def generate_rtd(app):
         sourceDir = "./source/"
 
     download_seqan(cloneDir)
-    #time.sleep(5)
+    if READ_THE_DOCS: time.sleep(5)
     run_doxygen(doxygenDir, includeDir)
-    #time.sleep(5)
+    if READ_THE_DOCS: time.sleep(5)
     generate_source(insourceDir, sourceDir)
 
 
@@ -73,7 +74,6 @@ def download_seqan(folder):
         retcode = subprocess.call("git clone -b fix_docs https://github.com/eseiler/seqan3.git %s" % folder, shell=True)
         if retcode < 0:
             sys.stderr.write("git clone terminated by signal %s" % (-retcode))
-            #time.sleep(5)
     except OSError as e:
         sys.stderr.write("download SeqAn execution failed: %s" % e)
     
@@ -81,7 +81,6 @@ def generate_source(inDir, outDir):
     print("DEBUGRTD Running generate_source with parameters inDir={} and outDir={} in pwd={}".format(inDir, outDir,
     os.getcwd()))
     generateIndex(inDir, outDir)
-    #time.sleep(5)
     generateRSTs(inDir, outDir, True)
 
 def setup(app):
