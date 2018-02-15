@@ -34,7 +34,8 @@ SOURCE_DIR = ""
 def setup(app):
 
     global READ_THE_DOCS 
-    READ_THE_DOCS = os.environ.get('READTHEDOCS', None) == 'True'
+    READ_THE_DOCS = os.environ.get("READTHEDOCS", None) == "True"
+    os.environ["READTHEDOCS_VERSION"] = "dev"
     # Every time a new build is requested, we start generate_rtd
     app.connect("builder-inited", generate_rtd)
 
