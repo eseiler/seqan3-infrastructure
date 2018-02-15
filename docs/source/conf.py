@@ -16,8 +16,6 @@
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
-# import os
-# import sys
 # sys.path.insert(0, os.path.abspath('.'))
 import os, subprocess, sys, time
 
@@ -29,11 +27,11 @@ def run_doxygen(folder, includeDir=None):
         retcode = subprocess.call("cd %s; cmake -DSEQAN3_INCLUDE_DIR=%s . &>/dev/null" % (folder, includeDir), shell=True)
         if retcode < 0:
             sys.stderr.write("cmake for doxygen failed")
-        time.sleep(5)
+        #time.sleep(5)
         retcode = subprocess.call("cd %s; ls; make doc_devel &>/dev/null; ls doc_devel; ls doc_devel/xml" % folder, shell=True)
         if retcode < 0:
             sys.stderr.write("doxygen terminated by signal %s" % (-retcode))
-        time.sleep(5)
+        #time.sleep(5)
     except OSError as e:
         sys.stderr.write("doxygen execution failed: %s" % e)
 
@@ -61,9 +59,9 @@ def generate_rtd(app):
         sourceDir = "./source/"
 
     download_seqan(cloneDir)
-    time.sleep(5)
+    #time.sleep(5)
     run_doxygen(doxygenDir, includeDir)
-    time.sleep(5)
+    #time.sleep(5)
     generate_source(insourceDir, sourceDir)
 
 
@@ -75,7 +73,7 @@ def download_seqan(folder):
         retcode = subprocess.call("git clone -b fix_docs https://github.com/eseiler/seqan3.git %s" % folder, shell=True)
         if retcode < 0:
             sys.stderr.write("git clone terminated by signal %s" % (-retcode))
-            time.sleep(5)
+            #time.sleep(5)
     except OSError as e:
         sys.stderr.write("download SeqAn execution failed: %s" % e)
     
@@ -83,7 +81,7 @@ def generate_source(inDir, outDir):
     print("DEBUGRTD Running generate_source with parameters inDir={} and outDir={} in pwd={}".format(inDir, outDir,
     os.getcwd()))
     generateIndex(inDir, outDir)
-    time.sleep(5)
+    #time.sleep(5)
     generateRSTs(inDir, outDir, True)
 
 def setup(app):
@@ -99,7 +97,7 @@ INDEX_TEMP = "_index.rst"
 def generateIndex(inDir, outDir):
     listModules = []
     for fileName in os.listdir(inDir) :
-        if os.path.isdir(inDir + fileName) == True:
+        if os.path.isdir(os.path.join(inDir, fileName)) == True:
             listModules.append(fileName)  
     listModules = sorted(listModules)
 
@@ -127,8 +125,8 @@ def generateRST(outDir, moduleName, listModules, listFiles) :
     for fileName in listFiles :
         print(outDir)
         print(fileName)
-        print(".. doxygenfile:: %s\n" % ('/'.join(outDir.split('/')[2:])+'/'+fileName))
-        outFile.write(".. doxygenfile:: %s\n" % ('/'.join(outDir.split('/')[2:])+'/'+fileName))
+        print(".. doxygenfile:: %s\n" % (os.path.join('/'.join(outDir.split('/')[2:]), fileName)))
+        outFile.write(".. doxygenfile:: %s\n" % (os.path.join('/'.join(outDir.split('/')[2:]), fileName)))
         outFile.write("   :project: Seqan3\n\n") # TODO generic
 
     # toctree
@@ -145,7 +143,7 @@ def generateRSTs(inDir, outDir, isRoot=False):
     listModules = []
     listFiles = []
     for fileName in os.listdir(inDir) :
-        if os.path.isdir(inDir + '/' + fileName) == True:
+        if os.path.isdir(os.path.join(inDir, fileName)) == True:
             listModules.append(fileName)  
         else :
             fileExt = fileName.split(".")[-1]
@@ -163,8 +161,8 @@ def generateRSTs(inDir, outDir, isRoot=False):
 
 
     for moduleName in listModules :
-        curInDir = inDir + '/' + moduleName
-        curOutDir = outDir + moduleName
+        curInDir = os.path.join(inDir, moduleName)
+        curOutDir = os.path.join(outDir, moduleName)
         generateRSTs(curInDir, curOutDir, False)
 
 # -- General configuration ------------------------------------------------
