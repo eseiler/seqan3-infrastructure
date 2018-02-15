@@ -19,7 +19,7 @@
 # import os
 # import sys
 # sys.path.insert(0, os.path.abspath('.'))
-import os, subprocess, sys
+import os, subprocess, sys, time
 
 def run_doxygen(folder, includeDir=None):
     """Run the doxygen make command in the designated folder"""
@@ -29,10 +29,11 @@ def run_doxygen(folder, includeDir=None):
         retcode = subprocess.call("cd %s; cmake -DSEQAN3_INCLUDE_DIR=%s . &>/dev/null" % (folder, includeDir), shell=True)
         if retcode < 0:
             sys.stderr.write("cmake for doxygen failed")
-
-        retcode = subprocess.call("cd %s; make doc_devel &>/dev/null" % folder, shell=True)
+        time.sleep(5)
+        retcode = subprocess.call("cd %s; ls; make doc_devel &>/dev/null; ls doc_devel; ls doc_devel/xml" % folder, shell=True)
         if retcode < 0:
             sys.stderr.write("doxygen terminated by signal %s" % (-retcode))
+        time.sleep(5)
     except OSError as e:
         sys.stderr.write("doxygen execution failed: %s" % e)
 
@@ -60,7 +61,9 @@ def generate_rtd(app):
         sourceDir = "./source/"
 
     download_seqan(cloneDir)
+    time.sleep(5)
     run_doxygen(doxygenDir, includeDir)
+    time.sleep(5)
     generate_source(insourceDir, sourceDir)
 
 
@@ -72,6 +75,7 @@ def download_seqan(folder):
         retcode = subprocess.call("git clone -b fix_docs https://github.com/eseiler/seqan3.git %s" % folder, shell=True)
         if retcode < 0:
             sys.stderr.write("git clone terminated by signal %s" % (-retcode))
+            time.sleep(5)
     except OSError as e:
         sys.stderr.write("download SeqAn execution failed: %s" % e)
     
@@ -79,6 +83,7 @@ def generate_source(inDir, outDir):
     print("DEBUGRTD Running generate_source with parameters inDir={} and outDir={} in pwd={}".format(inDir, outDir,
     os.getcwd()))
     generateIndex(inDir, outDir)
+    time.sleep(5)
     generateRSTs(inDir, outDir, True)
 
 def setup(app):
