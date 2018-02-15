@@ -17,128 +17,107 @@
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
 # sys.path.insert(0, os.path.abspath('.'))
+
+# This script resides in docs/source. If we need to pass a path to a file directly in this file, we need to pass the
+# relative path regarding docs/source. 
+# On Read The Docs, the working directory for invoking sphinx is docs/source, locally it's docs.
+# When calling subprocesses within this scirpt, we need to pass relative paths regarding the working directory.
+
 import os, subprocess, sys, time
 
+# Represents the environment variable READTHEDOCS that is set to 'True' if run by Read The Docs.
 READ_THE_DOCS = False
+# Store original source directory for use in recursive functions
+SOURCE_DIR = ""
 
-def run_doxygen(folder, includeDir=None):
-    """Run the doxygen make command in the designated folder"""
-    print("DEBUGRTD Running doxygen with parameters folder={} and includeDir={} in pwd={}".format(folder, includeDir,
-    os.getcwd()))
-    try:
-        retcode = subprocess.call("cd %s; cmake -DSEQAN3_INCLUDE_DIR=%s . &>/dev/null" % (folder, includeDir), shell=True)
-        if retcode < 0:
-            sys.stderr.write("cmake for doxygen failed")
-        if READ_THE_DOCS: time.sleep(5)
-        retcode = subprocess.call("cd %s; ls; make doc_devel &>/dev/null; ls doc_devel; ls doc_devel/xml" % folder, shell=True)
-        if retcode < 0:
-            sys.stderr.write("doxygen terminated by signal %s" % (-retcode))
-    except OSError as e:
-        sys.stderr.write("doxygen execution failed: %s" % e)
+# Connect with Sphinx
+def setup(app):
 
-
-def generate_rtd(app):
-    """Run the doxygen make commands if we're on the ReadTheDocs server"""
-
-    print("DEBUGRTD Running generate_rtd in pwd={}".format(os.getcwd()))
     global READ_THE_DOCS 
     READ_THE_DOCS = os.environ.get('READTHEDOCS', None) == 'True'
+    # Every time a new build is requested, we start generate_rtd
+    app.connect("builder-inited", generate_rtd)
 
+
+# Generate Read The Docs docs
+def generate_rtd(app):
+
+    # Set paths depending on whether we build on Read The Docs or locally    
     if READ_THE_DOCS:
-
         cloneDir = "../../seqan3"
         doxygenDir = "../../doxygen"
         includeDir = "../seqan3/include/seqan3/"
         insourceDir = "../../seqan3/include/seqan3"
         sourceDir = "../source/"
-
     else:
-
         cloneDir = "../seqan3"
         doxygenDir = "../doxygen"
         includeDir = "../seqan3/include/seqan3/"
         insourceDir = includeDir
         sourceDir = "./source/"
 
+    global SOURCE_DIR
+    SOURCE_DIR = sourceDir
+
+    # Clone the SeqAn Repository
     download_seqan(cloneDir)
     if READ_THE_DOCS: time.sleep(5)
+
+    # Run Doxygen
     run_doxygen(doxygenDir, includeDir)
     if READ_THE_DOCS: time.sleep(5)
+
+    # Generate RST files
     generate_source(insourceDir, sourceDir)
 
 
-def download_seqan(folder):
-    """Download SeqAn repository to designated folder"""
+# Run Doxygen in folder, needs SeqAn3 include directoy as includeDir
+def run_doxygen(folder, includeDir=None):
 
-    print("DEBUGRTD Running download_seqan with parameters folder={} in pwd={}".format(folder, os.getcwd()))
-    try:
-        retcode = subprocess.call("git clone -b fix_docs https://github.com/eseiler/seqan3.git %s" % folder, shell=True)
-        if retcode < 0:
-            sys.stderr.write("git clone terminated by signal %s" % (-retcode))
-    except OSError as e:
-        sys.stderr.write("download SeqAn execution failed: %s" % e)
-    
+    subprocess.check_call("cd {}; cmake -DSEQAN3_INCLUDE_DIR={} .".format(folder, includeDir), shell=True)
+    if READ_THE_DOCS: time.sleep(5)
+    subprocess.check_call("cd {}; make doc_devel".format(folder), shell=True)
+
+
+# Clone SeqAn3 Repository into folder
+def download_seqan(folder):
+
+    subprocess.check_call("""if [ ! -d {folder} ] ; then
+                                git clone -b fix_docs {url} {folder}
+                             else
+                                cd {folder}
+                                git pull {url}
+                             fi""".format(folder=folder, url="https://github.com/eseiler/seqan3.git"), shell=True)
+
+# Generate RST files for Read The Docs
 def generate_source(inDir, outDir):
-    print("DEBUGRTD Running generate_source with parameters inDir={} and outDir={} in pwd={}".format(inDir, outDir,
-    os.getcwd()))
+
     generateIndex(inDir, outDir)
     generateRSTs(inDir, outDir, True)
 
-def setup(app):
-
-    # Add hook
-    app.connect("builder-inited", generate_rtd)
 
 #  written by Jongkyu Kim (j.kim@fu-berlin.de)
 
-CAT_NAME = "Modules"
-INDEX_TEMP = "_index.rst"
-
+# Generate index.rst
 def generateIndex(inDir, outDir):
     listModules = []
     for fileName in os.listdir(inDir) :
-        if os.path.isdir(os.path.join(inDir, fileName)) == True:
+        if os.path.isdir(os.path.join(inDir, fileName)):
             listModules.append(fileName)  
     listModules = sorted(listModules)
 
     # generate index.rst
-    inFile = open(outDir + INDEX_TEMP, "r")
-    outFile = open(outDir + "index.rst", "w")
+    inFile = open(os.path.join(outDir, "_index.rst"), "r")
+    outFile = open(os.path.join(outDir, "index.rst"), "w")
     for line in inFile :
         outFile.write(line)
     inFile.close()
-    outFile.write("   :caption: %s:\n\n" % CAT_NAME)
+    outFile.write("   :caption: Modules:\n\n")
     for moduleName in listModules :
-        outFile.write("   %s\n" % (moduleName))
+        outFile.write("   {}\n".format(moduleName))
     outFile.close()
 
-def generateRST(outDir, moduleName, listModules, listFiles) :
-    if len(listModules) > 0 and os.path.isdir(outDir) == False:
-        os.mkdir(outDir)
-
-    # title
-    outFile = open(outDir + ".rst","w")
-    outFile.write(moduleName[0].upper() + moduleName[1:] + "\n")
-    outFile.write("=" * len(moduleName) + "\n\n")
-
-    # doxygenfile
-    for fileName in listFiles :
-        print(outDir)
-        print(fileName)
-        print(".. doxygenfile:: %s\n" % (os.path.join('/'.join(outDir.split('/')[2:]), fileName)))
-        outFile.write(".. doxygenfile:: %s\n" % (os.path.join('/'.join(outDir.split('/')[2:]), fileName)))
-        outFile.write("   :project: Seqan3\n\n") # TODO generic
-
-    # toctree
-    outFile.write(".. toctree::\n")
-    outFile.write("   :caption: %s:\n" % CAT_NAME)
-    outFile.write("   :titlesonly:\n")
-    outFile.write("   :maxdepth: 1\n")
-    outFile.write("   :hidden:\n\n")
-    for childModuleName in listModules :
-       outFile.write("   %s/%s\n" % (moduleName, childModuleName) )
-    outFile.close()
-
+# Generate RSTs for all modules
 def generateRSTs(inDir, outDir, isRoot=False):
     listModules = []
     listFiles = []
@@ -146,8 +125,8 @@ def generateRSTs(inDir, outDir, isRoot=False):
         if os.path.isdir(os.path.join(inDir, fileName)) == True:
             listModules.append(fileName)  
         else :
-            fileExt = fileName.split(".")[-1]
-            if fileExt == "hpp" or fileExt == "cpp" :
+            fileExt = os.path.splitext(fileName)[1]
+            if fileExt == ".hpp" or fileExt == ".cpp" :
                 listFiles.append(fileName)
     
     listModules = sorted(listModules)
@@ -156,14 +135,40 @@ def generateRSTs(inDir, outDir, isRoot=False):
     print isRoot, inDir, outDir, listModules, listFiles
 
     if isRoot == False :
-        moduleName = outDir.split("/")[-1]
+        moduleName = os.path.basename(outDir)
         generateRST(outDir, moduleName, listModules, listFiles)
-
 
     for moduleName in listModules :
         curInDir = os.path.join(inDir, moduleName)
         curOutDir = os.path.join(outDir, moduleName)
         generateRSTs(curInDir, curOutDir, False)
+
+
+# Generate RST for a single module
+def generateRST(outDir, moduleName, listModules, listFiles) :
+    if len(listModules) > 0 and os.path.isdir(outDir) == False:
+        os.mkdir(outDir)
+
+    # title
+    outFile = open(os.path.join(os.path.dirname(outDir), os.path.basename(outDir)+".rst"), "w")
+    outFile.write("{}{}\n".format(moduleName[0].upper(), moduleName[1:]))
+    outFile.write("{}\n\n".format("=" * len(moduleName)))
+
+    # doxygenfile
+    for fileName in listFiles :
+        outFile.write(".. doxygenfile:: {}\n".format((os.path.join(outDir.replace(SOURCE_DIR, ''), fileName))))
+        outFile.write("   :project: Seqan3\n\n")
+
+    # toctree
+    outFile.write(".. toctree::\n")
+    outFile.write("   :caption: MODULES:\n")
+    outFile.write("   :titlesonly:\n")
+    outFile.write("   :maxdepth: 1\n")
+    outFile.write("   :hidden:\n\n")
+    for childModuleName in listModules :
+       outFile.write("   {}\n".format(os.path.join(moduleName, childModuleName)))
+    outFile.close()
+
 
 # -- General configuration ------------------------------------------------
 
