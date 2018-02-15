@@ -158,7 +158,7 @@ def generateRSTs(inDir, outDir, isRoot=False):
 
 
     for moduleName in listModules :
-        curInDir = inDir + moduleName
+        curInDir = inDir + '/' + moduleName
         curOutDir = outDir + moduleName
         generateRSTs(curInDir, curOutDir, False)
 
