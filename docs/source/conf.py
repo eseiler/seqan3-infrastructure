@@ -140,7 +140,7 @@ def generateRSTs(inDir, outDir, isRoot=False):
     listModules = []
     listFiles = []
     for fileName in os.listdir(inDir) :
-        if os.path.isdir(inDir + fileName) == True:
+        if os.path.isdir(inDir + '/' + fileName) == True:
             listModules.append(fileName)  
         else :
             fileExt = fileName.split(".")[-1]
