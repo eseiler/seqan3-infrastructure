@@ -23,12 +23,14 @@ import os, subprocess, sys
 
 def run_doxygen(folder, includeDir=None):
     """Run the doxygen make command in the designated folder"""
+    print("DEBUGRTD Running doxygen with parameters folder={} and includeDir={} in pwd={}".format(folder, includeDir,
+    os.getcwd()))
     try:
-        retcode = subprocess.call("cd %s; cmake -DSEQAN3_INCLUDE_DIR=%s ." % (folder, includeDir), shell=True)
+        retcode = subprocess.call("cd %s; cmake -DSEQAN3_INCLUDE_DIR=%s . &>/dev/null" % (folder, includeDir), shell=True)
         if retcode < 0:
             sys.stderr.write("cmake for doxygen failed")
 
-        retcode = subprocess.call("cd %s; make doc_devel 2>&1 1>/dev/null" % folder, shell=True)
+        retcode = subprocess.call("cd %s; make doc_devel &>/dev/null" % folder, shell=True)
         if retcode < 0:
             sys.stderr.write("doxygen terminated by signal %s" % (-retcode))
     except OSError as e:
@@ -38,6 +40,7 @@ def run_doxygen(folder, includeDir=None):
 def generate_rtd(app):
     """Run the doxygen make commands if we're on the ReadTheDocs server"""
 
+    print("DEBUGRTD Running generate_rtd in pwd={}".format(os.getcwd()))
     read_the_docs_build = os.environ.get('READTHEDOCS', None) == 'True'
 
     if read_the_docs_build:
@@ -64,6 +67,7 @@ def generate_rtd(app):
 def download_seqan(folder):
     """Download SeqAn repository to designated folder"""
 
+    print("DEBUGRTD Running download_seqan with parameters folder={} in pwd={}".format(folder, os.getcwd()))
     try:
         retcode = subprocess.call("git clone -b fix_docs https://github.com/eseiler/seqan3.git %s" % folder, shell=True)
         if retcode < 0:
@@ -72,6 +76,8 @@ def download_seqan(folder):
         sys.stderr.write("download SeqAn execution failed: %s" % e)
     
 def generate_source(inDir, outDir):
+    print("DEBUGRTD Running generate_source with parameters inDir={} and outDir={} in pwd={}".format(inDir, outDir,
+    os.getcwd()))
     generateIndex(inDir, outDir)
     generateRSTs(inDir, outDir, True)
 
