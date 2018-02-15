@@ -41,7 +41,8 @@ def generate_rtd(app):
     """Run the doxygen make commands if we're on the ReadTheDocs server"""
 
     print("DEBUGRTD Running generate_rtd in pwd={}".format(os.getcwd()))
-    global READ_THE_DOCS = os.environ.get('READTHEDOCS', None) == 'True'
+    global READ_THE_DOCS 
+    READ_THE_DOCS = os.environ.get('READTHEDOCS', None) == 'True'
 
     if READ_THE_DOCS:
 
